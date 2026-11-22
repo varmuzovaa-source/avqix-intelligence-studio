@@ -1,3 +1,4 @@
+import { authErrorMessage } from "@/lib/auth-errors";
 import { uploadWorkspace, downloadWorkspace } from "@/lib/cloud-workspace";
 import { exportWorkspaceBackup, restoreWorkspaceBackup } from "@/lib/workspace-backup";
 import { useEffect, useState } from "react";
@@ -9,6 +10,7 @@ export function CloudAccount() {
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   useEffect(() => {
@@ -22,13 +24,13 @@ export function CloudAccount() {
     setBusy(true);
     try {
       const { error } = register
-        ? await supabase.auth.signUp({ email, password })
-        : await supabase.auth.signInWithPassword({ email, password });
+        ? await supabase.auth.signUp({ email: email.trim(), password })
+        : await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (error) throw error;
       setPassword("");
       setMessage(register ? "Zkontrolujte e-mail a potvrďte registraci." : "Přihlášení proběhlo.");
-    } catch {
-      setMessage("Přihlášení se nepodařilo. Ověřte e-mail, heslo a potvrzení registrace.");
+    } catch (error) {
+      setMessage(authErrorMessage(error));
     } finally {
       setBusy(false);
     }
@@ -127,7 +129,7 @@ export function CloudAccount() {
             Heslo
             <input
               className="w-full border rounded p-2"
-              type="password"
+              type={showPassword ? "text" : "password"}
               minLength={8}
               autoComplete="current-password"
               required
@@ -135,6 +137,15 @@ export function CloudAccount() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </label>
+          <Button
+            type="button"
+            variant="outline"
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword((value) => !value)}
+          >
+            {showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
+          </Button>
+          <p>Použijte heslo zvolené při registraci AVQIX. Heslo k vašemu Gmailu sem nepatří.</p>
           <Button disabled={busy} type="submit">
             Přihlásit se
           </Button>
