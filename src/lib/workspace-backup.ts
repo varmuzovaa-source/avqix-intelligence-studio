@@ -29,27 +29,27 @@ function ensure(condition: unknown, message: string): asserts condition {
 
 /** Validate everything before reading or writing existing local data. */
 export function validateWorkspaceSnapshot(input: unknown): WorkspaceSnapshot {
-  ensure(isObject(input) && input.version === 1, 'Neplatná verze zálohy AVQIX.');
-  ensure(typeof input.savedAt === 'string' && !Number.isNaN(Date.parse(input.savedAt)), 'V záloze chybí platné datum.');
-  ensure(Array.isArray(input.clients) && input.clients.length <= 500, 'Neplatný seznam klientů.');
-  for (const client of input.clients) {
-    ensure(isObject(client) && typeof client.name === 'string' && client.name.length >= 2 && client.name.length <= 60, 'Neplatný klient v záloze.');
-    ensure(typeof client.slug === 'string' && /^[a-z0-9-]+$/.test(client.slug), 'Neplatný identifikátor klienta.');
-    ensure(models.includes(client.model as BusinessModel), 'Neznámý typ podnikání.');
-    ensure(client.googleId === undefined || typeof client.googleId === 'string', 'Neplatné Google Ads ID.');
-    ensure(client.metaId === undefined || typeof client.metaId === 'string', 'Neplatné Meta Ads ID.');
+  ensure(isObject(input) && input['version'] === 1, 'Neplatná verze zálohy AVQIX.');
+  ensure(typeof input['savedAt'] === 'string' && !Number.isNaN(Date.parse(input['savedAt'])), 'V záloze chybí platné datum.');
+  ensure(Array.isArray(input['clients']) && input['clients'].length <= 500, 'Neplatný seznam klientů.');
+  for (const client of input['clients']) {
+    ensure(isObject(client) && typeof client['name'] === 'string' && client['name'].length >= 2 && client['name'].length <= 60, 'Neplatný klient v záloze.');
+    ensure(typeof client['slug'] === 'string' && /^[a-z0-9-]+$/.test(client['slug']), 'Neplatný identifikátor klienta.');
+    ensure(models.includes(client['model'] as BusinessModel), 'Neznámý typ podnikání.');
+    ensure(client['googleId'] === undefined || typeof client['googleId'] === 'string', 'Neplatné Google Ads ID.');
+    ensure(client['metaId'] === undefined || typeof client['metaId'] === 'string', 'Neplatné Meta Ads ID.');
   }
-  ensure(isObject(input.goals) && Object.keys(input.goals).length <= 500, 'Neplatné cíle v záloze.');
-  for (const goals of Object.values(input.goals)) {
-    ensure(isObject(goals) && typeof goals.business === 'string' && typeof goals.marketing === 'string' && Array.isArray(goals.kpis) && goals.kpis.length <= 100, 'Neplatné marketingové cíle.');
-    for (const kpi of goals.kpis) {
-      ensure(isObject(kpi) && typeof kpi.id === 'string' && typeof kpi.metric === 'string' && typeof kpi.target === 'number' && Number.isFinite(kpi.target), 'Neplatné KPI.');
+  ensure(isObject(input['goals']) && Object.keys(input['goals']).length <= 500, 'Neplatné cíle v záloze.');
+  for (const goals of Object.values(input['goals'])) {
+    ensure(isObject(goals) && typeof goals['business'] === 'string' && typeof goals['marketing'] === 'string' && Array.isArray(goals['kpis']) && goals['kpis'].length <= 100, 'Neplatné marketingové cíle.');
+    for (const kpi of goals['kpis']) {
+      ensure(isObject(kpi) && typeof kpi['id'] === 'string' && typeof kpi['metric'] === 'string' && typeof kpi['target'] === 'number' && Number.isFinite(kpi['target']), 'Neplatné KPI.');
     }
   }
-  ensure(Array.isArray(input.tasks) && input.tasks.length <= 10000, 'Neplatný seznam úkolů.');
-  for (const task of input.tasks) {
-    ensure(isObject(task) && typeof task.id === 'string' && typeof task.title === 'string' && typeof task.sourceKey === 'string', 'Neplatný úkol.');
-    ensure(statuses.includes(task.status as string) && priorities.includes(task.priority as string), 'Neplatný stav úkolu.');
+  ensure(Array.isArray(input['tasks']) && input['tasks'].length <= 10000, 'Neplatný seznam úkolů.');
+  for (const task of input['tasks']) {
+    ensure(isObject(task) && typeof task['id'] === 'string' && typeof task['title'] === 'string' && typeof task['sourceKey'] === 'string', 'Neplatný úkol.');
+    ensure(statuses.includes(task['status'] as string) && priorities.includes(task['priority'] as string), 'Neplatný stav úkolu.');
     for (const field of ['action', 'source', 'recipient', 'impact', 'owner', 'createdAt']) {
       ensure(typeof task[field] === 'string', 'Neplatná položka úkolu: ' + field);
     }

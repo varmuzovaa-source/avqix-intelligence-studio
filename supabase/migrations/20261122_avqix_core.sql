@@ -73,3 +73,7 @@ create policy avqix_tasks_owner on public.avqix_tasks
 
 -- Never expose service_role keys in browser. Supabase anon/publishable key
 -- is usable only with Auth and RLS. Review policies before production.
+
+-- Explicit API privileges: RLS still decides which rows are accessible.
+revoke all on public.avqix_clients, public.avqix_goals, public.avqix_tasks from anon;
+grant select, insert, update, delete on public.avqix_clients, public.avqix_goals, public.avqix_tasks to authenticated;

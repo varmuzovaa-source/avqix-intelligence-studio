@@ -26,7 +26,7 @@ export function Recommendations({ areas, title = 'Doporučení' }: { areas: Reco
         <p>{r.insight}</p>
         <p className="reco-action"><strong>Co udělat:</strong> {r.action}</p>
         <div className="reco-foot"><div><small>PŘEDAT</small><strong>{r.recipient}</strong><span className="reco-audience">{r.audience === 'Klient' ? 'Pro klienta' : 'Interní tým'} · {r.impact}</span></div>
-          <Button size="sm" variant={isSent(r.id) ? 'ghost' : 'outline'} disabled={isSent(r.id)} onClick={() => tasksStore.add({ sourceKey: keyOf(r.id), title: r.title, action: r.action, source: `${clients[client]} · ${recoAreas.find(a => a.id === r.area)?.name}`, recipient: r.recipient, impact: r.impact, priority: r.priority })}>{isSent(r.id) ? <><Check />Předáno</> : <><Send />Předat</>}</Button></div>
+          <Button size="sm" variant={isSent(r.id) ? 'ghost' : 'outline'} disabled={isSent(r.id)} onClick={() => tasksStore.add({ clientName: clients[client] ?? '', sourceKey: keyOf(r.id), title: r.title, action: r.action, source: `${clients[client]} · ${recoAreas.find(a => a.id === r.area)?.name}`, recipient: r.recipient, impact: r.impact, priority: r.priority })}>{isSent(r.id) ? <><Check />Předáno</> : <><Send />Předat</>}</Button></div>
       </article>)}</div>}
     {areas.length === 1 && reco[areas[0]!] && <Button variant="ghost" size="sm" className="reco-hide" onClick={() => toggleReco(areas[0]!)}><EyeOff />Skrýt zde</Button>}
   </section>;

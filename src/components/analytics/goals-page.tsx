@@ -72,7 +72,7 @@ export function GoalsPage() {
         <p><strong>Proč:</strong> {a.insight}</p>
         <p className="reco-action"><strong>Co udělat:</strong> {a.action}</p>
         <div className="reco-foot"><div><small>PŘEDAT</small><strong>{a.recipient}</strong><span className="reco-audience">{a.audience === 'Klient' ? 'Pro klienta' : 'Interní tým'} · {a.impact}</span></div>
-          <Button size="sm" variant={sent(a) ? 'ghost' : 'outline'} disabled={sent(a)} onClick={() => tasksStore.add({ sourceKey: sourceKey(a), title: a.title, action: a.action, source: `${name} · cíl ${metricInfo[a.metric].code} · ${a.channel}`, recipient: a.recipient, impact: a.impact, priority: a.priority })}>{sent(a) ? <><Check />Předáno</> : <><Send />Předat</>}</Button></div>
+          <Button size="sm" variant={sent(a) ? 'ghost' : 'outline'} disabled={sent(a)} onClick={() => tasksStore.add({ clientName: name, sourceKey: sourceKey(a), title: a.title, action: a.action, source: `${name} · cíl ${metricInfo[a.metric].code} · ${a.channel}`, recipient: a.recipient, impact: a.impact, priority: a.priority })}>{sent(a) ? <><Check />Předáno</> : <><Send />Předat</>}</Button></div>
       </article>)}</div>
     </section>
   </main>;

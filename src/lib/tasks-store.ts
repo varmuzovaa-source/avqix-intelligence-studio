@@ -10,6 +10,7 @@ export const statusLabels: Record<TaskStatus, string> = { todo: 'K řešení', d
 
 export type Task = {
   id: string;
+  clientName?: string;
   /** Stable key of the recommendation it came from, used to avoid duplicates. */
   sourceKey: string;
   title: string;
@@ -23,7 +24,7 @@ export type Task = {
   createdAt: string;
 };
 
-export type NewTask = Pick<Task, 'sourceKey' | 'title' | 'action' | 'source' | 'recipient' | 'impact' | 'priority'>;
+export type NewTask = Pick<Task, 'sourceKey' | 'title' | 'action' | 'source' | 'recipient' | 'impact' | 'priority'> & { clientName?: string };
 
 const KEY = 'avqix-tasks-v1';
 const listeners = new Set<() => void>();
