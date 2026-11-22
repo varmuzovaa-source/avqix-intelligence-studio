@@ -18,7 +18,7 @@ export function TasksPage() {
 
   return <main className="page-content">
     <PageHeader title="Úkoly týmu" description="Co je potřeba udělat, kdo to řeší a v jakém je to stavu." />
-    <div className="info-banner"><Users size={18} /><span>Úkoly vznikají tlačítkem Předat u doporučení. Ukládají se jen v tomto prohlížeči, kolegové je zatím neuvidí. Pro sdílení v týmu použijte Export CSV.</span></div>
+    <div className="info-banner"><Users size={18} /><span>Úkoly vznikají tlačítkem Předat u doporučení. Úkoly vlastních klientů se automaticky ukládají do vašeho účtu. Týmové sdílení zatím není dostupné.</span></div>
 
     <div className="metrics-grid">
       <article className="metric-card"><div className="metric-label">Všechny úkoly</div><div className="metric-value">{tasks.length}</div></article>

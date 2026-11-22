@@ -58,7 +58,7 @@ export function GoalsPage() {
 
     <section className="reco-section">
       <SectionHeading title="Jak daleko jsme" subtitle="Skutečnost proti cíli" />
-      {progress.length === 0 ? <div className="info-banner"><Target size={18} /><span>Zatím tu není žádný cíl. Přidejte aspoň jedno číslo výše a uložte.</span></div>
+      {progress.length === 0 ? <div className="info-banner"><Target size={18} /><span>Zatím nemáte číselné KPI. Textové cíle můžete uložit i bez něj.</span></div>
         : <div className="goal-progress-grid">{progress.map(p => <ProgressCard key={p.goal.id} p={p} conversion={model.vocab.conversion} />)}</div>}
     </section>
 
@@ -72,7 +72,7 @@ export function GoalsPage() {
         <p><strong>Proč:</strong> {a.insight}</p>
         <p className="reco-action"><strong>Co udělat:</strong> {a.action}</p>
         <div className="reco-foot"><div><small>PŘEDAT</small><strong>{a.recipient}</strong><span className="reco-audience">{a.audience === 'Klient' ? 'Pro klienta' : 'Interní tým'} · {a.impact}</span></div>
-          <Button size="sm" variant={sent(a) ? 'ghost' : 'outline'} disabled={sent(a)} onClick={() => tasksStore.add({ sourceKey: sourceKey(a), title: a.title, action: a.action, source: `${name} · cíl ${metricInfo[a.metric].code} · ${a.channel}`, recipient: a.recipient, impact: a.impact, priority: a.priority })}>{sent(a) ? <><Check />Předáno</> : <><Send />Předat</>}</Button></div>
+          <Button size="sm" variant={sent(a) ? 'ghost' : 'outline'} disabled={sent(a)} onClick={() => tasksStore.add({ clientName: name, sourceKey: sourceKey(a), title: a.title, action: a.action, source: `${name} · cíl ${metricInfo[a.metric].code} · ${a.channel}`, recipient: a.recipient, impact: a.impact, priority: a.priority })}>{sent(a) ? <><Check />Předáno</> : <><Send />Předat</>}</Button></div>
       </article>)}</div>
     </section>
   </main>;
@@ -97,7 +97,7 @@ function GoalForm({ name, goals, model }: { name: string; goals: ClientGoals; mo
   const modelKey = (Object.keys(clientConfigKeys) as (keyof typeof clientConfigKeys)[]).find(k => clientConfigKeys[k] === model) ?? 'ecommerce';
   const setKpi = (id: string, patch: Partial<KpiGoal>) => setDraft(d => ({ ...d, kpis: d.kpis.map(k => (k.id === id ? { ...k, ...patch } : k)) }));
   const info = (m: GoalMetric) => metricInfo[m];
-  const save = () => { goalsStore.save(name, { ...draft, kpis: draft.kpis.filter(k => k.target > 0) }); setMsg('Uloženo v tomto prohlížeči.'); };
+  const save = () => { goalsStore.save(name, { ...draft, kpis: draft.kpis.filter(k => k.target > 0) }); setMsg('Cíle byly uloženy. Pro vlastního klienta se automaticky odesílají do cloudu; stav najdete nahoře.'); };
   const copy = async () => {
     const text = goalsToMarkdown(name, draft);
     try { await navigator.clipboard.writeText(text); setMsg('Zkopírováno. Vložte to do části „2. Cíle (KPI)“ souboru ppc.md klienta.'); } catch { setMsg('Kopírování se nepovedlo, zkuste to znovu.'); }
@@ -128,7 +128,7 @@ function GoalForm({ name, goals, model }: { name: string; goals: ClientGoals; mo
         <CsvPicker label="Načíst z ppc.md" accept=".md,.txt,text/markdown,text/plain" onText={t => load(t)} icon={<Upload />} />
       </div>
       {msg && <p className="goal-help" role="status">{msg}</p>}
-      <p className="goal-help">Cíle se ukládají jen v tomto prohlížeči. Aby je znal i Fachman, zkopírujte je a vložte do souboru ppc.md klienta.</p>
+      <p className="goal-help">U vlastního klienta se uložené cíle automaticky synchronizují. Číselné KPI přidáte tlačítkem Přidat číslo.</p>
     </div>
   </section>;
 }

@@ -21,6 +21,7 @@ function commit(next: CustomClient[], persist = true) {
 }
 
 export const clientsStore = {
+  replace: (next: CustomClient[]) => commit(next),
   get: () => state,
   subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
   hydrate() {

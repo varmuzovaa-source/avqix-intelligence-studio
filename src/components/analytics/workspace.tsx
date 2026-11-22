@@ -1,3 +1,5 @@
+import { CloudSyncStatus } from './cloud-sync';
+import { resolveClientIndex } from '@/lib/client-selection';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { LayoutGrid, Users, Sprout, Globe2, Megaphone, FileChartColumn, Settings2, Search, Database, ListChecks, Target, PanelLeftClose, PanelLeftOpen, ChevronDown, ArrowUpRight, Bell, Check, X, Menu, Command, CircleHelp } from 'lucide-react';
@@ -25,9 +27,22 @@ const navigation = [
 const demoOnly: string[] = ['/organika', '/web', '/reporty'];
 const customOverview: string[] = ['/', '/kampane'];
 export function Workspace({ children }: { children: ReactNode }) {
-  const [client, setClient] = useState(0);
-  useCustomClients();
-  useEffect(() => { clientsStore.hydrate(); }, []);
+  const [selectedName, setSelectedName] = useState<string | null>(null);
+  const customClients = useCustomClients();
+  const client = resolveClientIndex(selectedName, clients, selectedName === null ? undefined : customClients[0]?.name);
+  const setClient = (index: number) => {
+    const name = clients[index];
+    if (!name) return;
+    setSelectedName(name);
+    try { localStorage.setItem('avqix-selected-client-v1', name); } catch { /* session-only fallback */ }
+  };
+  useEffect(() => {
+    clientsStore.hydrate();
+    let saved: string | null = null;
+    try { saved = localStorage.getItem('avqix-selected-client-v1'); } catch { /* unavailable storage */ }
+    const index = resolveClientIndex(saved, clients, clientsStore.get()[0]?.name);
+    setSelectedName(clients[index] ?? null);
+  }, []);
   const [period, setPeriod] = useState('30');
   const [reco, setReco] = useState<RecoState>({ keywords: true, google: true, meta: true, crm: true });
   const toggleReco = (a: RecoArea) => setReco(r => ({ ...r, [a]: !r[a] }));
@@ -41,12 +56,12 @@ export function Workspace({ children }: { children: ReactNode }) {
       {mobileOpen && <div className="sidebar-scrim" onClick={() => setMobileOpen(false)} />}
       <aside className="workspace-sidebar">
         <div className="brand"><span className="brand-mark"><Command size={22} /></span><div className="sidebar-label"><strong>AVQIX</strong><small>Intelligence Studio</small></div><Button className="mobile-close" variant="ghost" size="icon" aria-label="Zavřít navigaci" onClick={() => setMobileOpen(false)}><X /></Button></div>
-        <div className="client-select"><span className="client-monogram">{clientMonogram(client)}</span><div className="sidebar-label"><small>PRACOVNÍ PROSTOR</small><select aria-label="Vybrat klienta" value={client} onChange={e => setClient(Number(e.target.value))}>{clients.map((name, i) => <option key={name} value={i}>{name}</option>)}</select></div><ChevronDown className="sidebar-label" size={15} /></div>
+        <label className="client-select"><span className="client-monogram">{clientMonogram(client)}</span><span className="sidebar-label"><small>VYBRANÝ KLIENT</small><strong className="selected-client-name">{clients[client]}</strong></span><ChevronDown className="sidebar-label" size={15} /><select className="client-picker" aria-label="Vybrat klienta" value={client} onChange={e => setClient(Number(e.target.value))}>{clients.map((name, i) => <option key={name} value={i}>{name}{isCustomClient(i) ? '' : ' (ukázka)'}</option>)}</select></label>
         <div className="sidebar-nav-label sidebar-label">WORKSPACE</div>
         <nav aria-label="Hlavní navigace">{navigation.filter(item => !clientConfig(client).hiddenSections.includes(item.to) && !(isCustomClient(client) && demoOnly.includes(item.to))).map(item => <Button key={item.to} asChild variant="ghost" className={`nav-item ${path === item.to ? 'active' : ''}`} title={item.name}><Link to={item.to} onClick={() => setMobileOpen(false)}><item.icon size={18} /><span className="sidebar-label">{item.name}</span>{path === item.to && <span className="nav-dot sidebar-label" />}</Link></Button>)}</nav>
         <div className="sidebar-bottom"><div className="workspace-note sidebar-label"><span className="status-dot" /> {isCustomClient(client) ? 'Váš klient' : 'Ukázkový pracovní prostor'}<small>{clientConfig(client).label}</small></div><Button asChild variant="ghost" className={`nav-item ${path === '/nastaveni' ? 'active' : ''}`} title="Nastavení"><Link to="/nastaveni"><Settings2 /><span className="sidebar-label">Nastavení</span></Link></Button><Button variant="ghost" className="nav-item collapse-control" onClick={() => setCollapsed(!collapsed)} title={collapsed ? 'Rozbalit navigaci' : 'Sbalit navigaci'} aria-label={collapsed ? 'Rozbalit navigaci' : 'Sbalit navigaci'}>{collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}<span className="sidebar-label">Sbalit menu</span></Button><Button asChild variant="ghost" className="profile-button" title="Uživatelský profil"><Link to="/profil"><span className="avatar">AV</span><span className="sidebar-label"><strong>Andrea Varmužová</strong><small>Marketing manager</small></span><ChevronDown className="sidebar-label" size={15} /></Link></Button></div>
       </aside>
-      <div className="workspace-main"><header className="topbar"><div className="flex items-center gap-3"><Button variant="ghost" size="icon" className="mobile-menu" aria-label="Otevřít navigaci" onClick={() => setMobileOpen(true)}><Menu /></Button><span className="text-muted-foreground">Workspace</span><span className="text-muted-foreground">/</span><span>{current}</span></div><div className="topbar-right"><span className="demo-label">{isCustomClient(client) ? 'Vaše data' : 'Demo data'}</span><div className="relative"><Button variant="ghost" size="icon" aria-label="Oznámení" onClick={() => setNotice(!notice)} className="notification-button"><Bell /><span /></Button>{notice && <div className="notice-popover"><strong>Oznámení</strong><p><Check size={16} /> Ukázková data jsou připravena.</p><small>Žádné externí účty nejsou připojené.</small></div>}</div><Button asChild variant="ghost" size="icon" title="Zdroje dat"><Link to="/nastaveni" aria-label="Zdroje dat"><CircleHelp /></Link></Button><span className="avatar avatar-small">AV</span></div></header>{isCustomClient(client) && customOverview.includes(path) ? <CustomOverview campaignsOnly={path === '/kampane'} /> : isCustomClient(client) && demoOnly.includes(path) ? <DemoOnlyNotice name={clients[client] ?? ''} /> : children}<footer className="workspace-footer"><span>AVQIX Intelligence Studio</span><span>{isCustomClient(client) ? 'Vaše data z importu' : 'Ukázková data · září 2026'} <ArrowUpRight size={12} /></span></footer></div>
+      <div className="workspace-main"><header className="topbar"><div className="flex items-center gap-3"><Button variant="ghost" size="icon" className="mobile-menu" aria-label="Otevřít navigaci" onClick={() => setMobileOpen(true)}><Menu /></Button><span className="text-muted-foreground">Workspace</span><span className="text-muted-foreground">/</span><span>{current}</span></div><div className="topbar-right">{isCustomClient(client) && <CloudSyncStatus />}<span className="demo-label">{isCustomClient(client) ? 'Vaše data' : 'Demo data'}</span><div className="relative"><Button variant="ghost" size="icon" aria-label="Oznámení" onClick={() => setNotice(!notice)} className="notification-button"><Bell /><span /></Button>{notice && <div className="notice-popover"><strong>Oznámení</strong><p><Check size={16} /> Ukázková data jsou připravena.</p><small>Žádné externí účty nejsou připojené.</small></div>}</div><Button asChild variant="ghost" size="icon" title="Zdroje dat"><Link to="/nastaveni" aria-label="Zdroje dat"><CircleHelp /></Link></Button><span className="avatar avatar-small">AV</span></div></header>{isCustomClient(client) && customOverview.includes(path) ? <CustomOverview campaignsOnly={path === '/kampane'} /> : isCustomClient(client) && demoOnly.includes(path) ? <DemoOnlyNotice name={clients[client] ?? ''} /> : children}<footer className="workspace-footer"><span>AVQIX Intelligence Studio</span><span>{isCustomClient(client) ? 'Vaše data z importu' : 'Ukázková data · září 2026'} <ArrowUpRight size={12} /></span></footer></div>
     </div>
   </WorkspaceContext.Provider>;
 }
