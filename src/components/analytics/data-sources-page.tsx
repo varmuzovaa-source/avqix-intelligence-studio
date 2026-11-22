@@ -17,6 +17,7 @@ import { bridgeSourceLabel, bridgeStore, useBridge } from '@/lib/campaign-data';
 import { parseFachmanJson } from '@/lib/fachman-bridge';
 import { clients } from '@/lib/analytics-data';
 import { useWorkspace } from './workspace';
+import { GettingStarted } from './getting-started';
 
 const nextSteps = [
   { title: '1. Začněte Search Console', text: 'Začněte exportem Dotazy a Stránky ze Search Console. Aplikace umí z CSV najít příležitosti pro SEO.' },
@@ -29,6 +30,7 @@ export function DataSourcesPage() {
   return <main className="page-content">
     <PageHeader title="Datové zdroje" description="Importujte dostupné soubory a ověřte, které zdroje jsou skutečně načtené." />
     <div className="info-banner"><ShieldCheck size={18} /><span>CSV soubory se zpracovávají v prohlížeči. Lokální most Fachman může načítat reklamní data jen při nastavených oprávněních a lokálním spuštění; veřejné demo nemá přímé připojení reklamních účtů.</span></div>
+    <GettingStarted />
     <SectionHeading title="Konektory" subtitle={`${connectors.length} modulů · ${connectors.filter(c => c.status === 'connected').length} připojeno`} />
     <section className="reco-section"><SectionHeading title="Co udělat dál" subtitle="Doporučený postup pro napojení dat" />
       <div className="reco-grid">{nextSteps.map(r => <article key={r.title} className="reco-card"><h3><Lightbulb size={15} />{r.title}</h3><p>{r.text}</p></article>)}</div></section>
