@@ -137,3 +137,9 @@ button { box-shadow:none!important; } a { text-decoration:none; } select { curso
 .avqix-start-card a:hover, .avqix-start-card a:focus-visible { text-decoration:underline; }
 .avqix-start-card a:focus-visible { outline:2px solid var(--foreground); outline-offset:4px; }
 @media (max-width:800px) { .avqix-start-grid { grid-template-columns:1fr; } .avqix-getting-started { padding:18px; } .avqix-getting-started-head { flex-direction:column; } .avqix-demo-warning { align-self:flex-start; } }
+
+/* The native client picker covers its entire visible control, including the chevron. */
+.client-select { position:relative; cursor:pointer; }
+.client-select select.client-picker { position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; z-index:1; }
+.client-select:focus-within { outline:2px solid var(--foreground); outline-offset:3px; }
+.selected-client-name { display:block; font-size:12px; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
