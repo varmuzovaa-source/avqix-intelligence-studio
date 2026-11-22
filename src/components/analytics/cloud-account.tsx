@@ -3,21 +3,28 @@ import { uploadWorkspace, downloadWorkspace } from "@/lib/cloud-workspace";
 import { exportWorkspaceBackup, restoreWorkspaceBackup } from "@/lib/workspace-backup";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import { supabase, passwordRecoveryRequested } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 
 export function CloudAccount() {
   const [user, setUser] = useState<User | null>(null);
+  const [recovery, setRecovery] = useState(false);
+  const [repeatPassword, setRepeatPassword] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   useEffect(() => {
+    if (passwordRecoveryRequested) setRecovery(true);
     void supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
-    const { data } = supabase.auth.onAuthStateChange((_event, session) =>
-      setUser(session?.user ?? null),
-    );
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (event === "PASSWORD_RECOVERY") {
+        setRecovery(true);
+        setPassword("");
+      }
+    });
     return () => data.subscription.unsubscribe();
   }, []);
   async function authenticate(register: boolean) {
@@ -43,7 +50,61 @@ export function CloudAccount() {
         automaticky; smazání se nepřenáší. Před načtením stáhněte lokální zálohu. Pracujte vždy na
         jednom zařízení.
       </p>
-      {user ? (
+      {recovery ? (
+        <form
+          className="avqix-start-grid"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (password !== repeatPassword) {
+              setMessage("Hesla se neshodují.");
+              return;
+            }
+            setBusy(true);
+            try {
+              const { error } = await supabase.auth.updateUser({ password });
+              if (error) throw error;
+              setPassword("");
+              setRepeatPassword("");
+              setRecovery(false);
+              setMessage("Nové heslo je uložené. Jste přihlášená.");
+            } catch {
+              setMessage(
+                "Heslo se nepodařilo uložit. Otevřete nový odkaz pro obnovu a zkuste to znovu.",
+              );
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          <label>
+            Nové heslo
+            <input
+              className="w-full border rounded p-2"
+              type="password"
+              autoComplete="new-password"
+              minLength={8}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+          <label>
+            Znovu nové heslo
+            <input
+              className="w-full border rounded p-2"
+              type="password"
+              autoComplete="new-password"
+              minLength={8}
+              required
+              value={repeatPassword}
+              onChange={(e) => setRepeatPassword(e.target.value)}
+            />
+          </label>
+          <Button disabled={busy} type="submit">
+            Uložit nové heslo
+          </Button>
+        </form>
+      ) : user ? (
         <>
           <p>{user.email}</p>
           <Button
@@ -146,6 +207,29 @@ export function CloudAccount() {
             {showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
           </Button>
           <p>Použijte heslo zvolené při registraci AVQIX. Heslo k vašemu Gmailu sem nepatří.</p>
+          <Button
+            disabled={busy || !email.trim()}
+            type="button"
+            variant="outline"
+            onClick={async () => {
+              setBusy(true);
+              try {
+                const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+                if (error) throw error;
+                setMessage(
+                  "Pokud účet existuje, přijde e-mail pro nastavení nového hesla. Otevřete nejnovější zprávu v tomto prohlížeči.",
+                );
+              } catch {
+                setMessage(
+                  "E-mail pro obnovu se nepodařilo odeslat. Počkejte chvíli a zkuste to znovu.",
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            Zapomenuté heslo
+          </Button>
           <Button disabled={busy} type="submit">
             Přihlásit se
           </Button>
