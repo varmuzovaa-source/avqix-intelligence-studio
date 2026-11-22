@@ -2,6 +2,9 @@ import { useRef, useState } from 'react';
 import { Download, Upload, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { exportWorkspaceBackup, restoreWorkspaceBackup } from '@/lib/workspace-backup';
+import { clientsStore } from '@/lib/clients-store';
+import { goalsStore } from '@/lib/goals-store';
+import { tasksStore } from '@/lib/tasks-store';
 
 /** Explicit offline-only backup, no paid services or API keys required. */
 export function WorkspaceBackup() {
@@ -37,7 +40,10 @@ export function WorkspaceBackup() {
         return;
       }
       restoreWorkspaceBackup(snapshot);
-      setStatus('Data obnovena. Obnovte stránku, aby se projevila ve všech přehledech.');
+      clientsStore.hydrate();
+      goalsStore.reset(snapshot.goals);
+      tasksStore.reset(snapshot.tasks);
+      setStatus('Data obnovena. U přihlášeného účtu se vlastní klienti, cíle a přiřazené úkoly automaticky synchronizují.');
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Soubor nelze načíst.');
     } finally {
@@ -48,9 +54,9 @@ export function WorkspaceBackup() {
     <section className="reco-section" aria-labelledby="avqix-backup-title">
       <div className="section-heading"><div>
         <h2 id="avqix-backup-title">Bezplatná záloha pracovního prostoru</h2>
-        <p>Klienti, cíle a úkoly – do souboru na vašem zařízení. Nic se neposílá do cloudu.</p>
+        <p>Stáhněte si kopii klientů, cílů a úkolů do souboru na svém zařízení.</p>
       </div></div>
-      <div className="info-banner"><ShieldCheck size={18} /><span>AVQIX zatím ukládá data v tomto prohlížeči. Před připojením databáze doporučujeme zálohu. Neukládejte sem hesla ani API tokeny.</span></div>
+      <div className="info-banner"><ShieldCheck size={18} /><span>Vlastní klienti se po přihlášení automaticky ukládají do cloudu. Soubor je dodatečná záloha. Obnovení nahradí pracovní data a poté je synchronizuje. Neukládejte sem hesla ani API tokeny.</span></div>
       <div className="gsc-actions">
         <Button size="sm" onClick={download}><Download size={16} />Stáhnout zálohu JSON</Button>
         <input ref={fileRef} type="file" accept=".json,application/json" aria-label="Soubor zálohy AVQIX" style={{ display:'none' }} onChange={event => void restore(event.target.files?.[0])} />
