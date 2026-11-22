@@ -3,7 +3,7 @@ import { uploadWorkspace, downloadWorkspace } from "@/lib/cloud-workspace";
 import { exportWorkspaceBackup, restoreWorkspaceBackup } from "@/lib/workspace-backup";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { supabase, passwordRecoveryRequested } from "@/lib/supabase";
+import { supabase, passwordRecoveryRequested, completePasswordRecovery } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 
 export function CloudAccount() {
@@ -65,6 +65,7 @@ export function CloudAccount() {
               if (error) throw error;
               setPassword("");
               setRepeatPassword("");
+              completePasswordRecovery();
               setRecovery(false);
               setMessage("Nové heslo je uložené. Jste přihlášená.");
             } catch {
