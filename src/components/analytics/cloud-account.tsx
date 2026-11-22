@@ -1,6 +1,5 @@
 import { authErrorMessage } from "@/lib/auth-errors";
-import { uploadWorkspace, downloadWorkspace } from "@/lib/cloud-workspace";
-import { exportWorkspaceBackup, restoreWorkspaceBackup } from "@/lib/workspace-backup";
+import { CloudSyncStatus } from "./cloud-sync";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase, passwordRecoveryRequested, completePasswordRecovery } from "@/lib/supabase";
@@ -46,9 +45,9 @@ export function CloudAccount() {
     <section className="avqix-getting-started" aria-label="Cloudový účet">
       <h2>Cloudový účet AVQIX</h2>
       <p>
-        Supabase Free. Ruční přenos klientů, cílů a přiřazených úkolů. Změny se neukládají
-        automaticky; smazání se nepřenáší. Před načtením stáhněte lokální zálohu. Pracujte vždy na
-        jednom zařízení.
+        Supabase Free. Klienti, uložené cíle a úkoly se ukládají automaticky. Stav uložení vidíte
+        nahoře. Při výpadku připojení zůstávají změny v tomto zařízení a po návratu připojení se
+        odešlou.
       </p>
       {recovery ? (
         <form
@@ -108,54 +107,7 @@ export function CloudAccount() {
       ) : user ? (
         <>
           <p>{user.email}</p>
-          <Button
-            disabled={busy}
-            onClick={async () => {
-              if (
-                !window.confirm(
-                  "Nahrát lokální data do tohoto účtu? Shodné záznamy budou přepsány. Smazání se nepřenáší.",
-                )
-              )
-                return;
-              setBusy(true);
-              try {
-                await uploadWorkspace(exportWorkspaceBackup());
-                setMessage("Nahráno.");
-              } catch (error) {
-                setMessage(
-                  error instanceof Error
-                    ? error.message
-                    : "Přenos selhal. Část záznamů může být uložená; přenos lze zopakovat.",
-                );
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            Nahrát do cloudu
-          </Button>
-          <Button
-            disabled={busy}
-            variant="outline"
-            onClick={async () => {
-              if (
-                !window.confirm(
-                  "Nahradit lokální klienty, cíle a úkoly daty přihlášeného účtu? Nejdříve si stáhněte zálohu.",
-                )
-              )
-                return;
-              setBusy(true);
-              try {
-                restoreWorkspaceBackup(await downloadWorkspace());
-                window.location.reload();
-              } catch {
-                setMessage("Načtení selhalo. Lokální data zůstávají zachována.");
-                setBusy(false);
-              }
-            }}
-          >
-            Načíst z cloudu
-          </Button>
+          <CloudSyncStatus details />
           <Button
             disabled={busy}
             onClick={async () => {
