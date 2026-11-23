@@ -2,7 +2,7 @@ import { CloudSyncStatus } from './cloud-sync';
 import { resolveClientIndex } from '@/lib/client-selection';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
-import { LayoutGrid, Users, Sprout, Globe2, Megaphone, FileChartColumn, Settings2, Search, Database, ListChecks, Target, PanelLeftClose, PanelLeftOpen, ChevronDown, ArrowUpRight, Bell, Check, X, Menu, Command, CircleHelp } from 'lucide-react';
+import { LayoutGrid, Users, Sprout, Globe2, Megaphone, FileChartColumn, Settings2, Search, Database, ListChecks, Target, Lightbulb, PanelLeftClose, PanelLeftOpen, ChevronDown, ArrowUpRight, Bell, Check, X, Menu, Command, CircleHelp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clients, clientMonogram, isCustomClient, clientConfig, type RecoArea } from '@/lib/analytics-data';
 import { clientsStore, useCustomClients } from '@/lib/clients-store';
@@ -22,6 +22,7 @@ const navigation = [
   { to: '/ukoly', name: 'Úkoly týmu', icon: ListChecks },
   { to: '/reporty', name: 'Reporty', icon: FileChartColumn },
   { to: '/datove-zdroje', name: 'Datové zdroje', icon: Database },
+  { to: '/strategie', name: 'Strategie & integrace', icon: Lightbulb },
 ] as const;
 /** Pages that only know the demo data. For clients the user added they are replaced by a short notice. */
 const demoOnly: string[] = ['/organika', '/web', '/reporty'];
