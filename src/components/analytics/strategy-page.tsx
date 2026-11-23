@@ -20,6 +20,13 @@ meta_ads:{access:'Meta Business portfolio, reklamní účet a oprávnění čís
 email:{access:'Ecomail účet s oprávněním pro statistiky kampaní; jiný poskytovatel dle API',automation:'Ecomail API nebo zabezpečené stahování agregovaných exportů',credential:'API klíč Ecomail (serverové tajemství)'},
 reservations:{access:'Název rezervačního systému + přístup ke statistikám a souhrnnému exportu',automation:'API / webhook, případně naplánovaný anonymizovaný CSV export podle dodavatele',credential:'API klíč / webhook secret pouze na serveru'}
 };
+const csvTemplates:Record<Channel,string>={
+  ga4:'sessions,key events,total revenue\\n120,7,3500',
+  google_ads:'cost,clicks,impressions,conversions,conversion value\\n1200,145,4000,9,5500',
+  meta_ads:'amount spent,link clicks,impressions,results,purchase conversion value\\n980,112,5600,7,4200',
+  email:'sent,opens,clicks,unsubscribes\\n500,176,25,1',
+  reservations:'reservations,guests,cancellations,revenue\\n32,69,2,12600'
+};
 type SnapshotState=Record<string,Partial<Record<Channel,ChannelReport>>>;
 export function StrategyPage(){
   const {client}=useWorkspace();
@@ -44,6 +51,13 @@ export function StrategyPage(){
       setAll(s=>({...s,[name]:{...s[name],[channel]:report}}));
       setErrors(s=>({...s,[channel]:''}));
     }).catch((error:unknown)=>setErrors(s=>({...s,[channel]:error instanceof Error?error.message:'Import se nezdařil'})));
+  };
+  const exportTemplate=(channel:Channel)=>{
+    const data=csvTemplates[channel].replaceAll('\\\\n','\\n');
+    const blob=new Blob(['\\uFEFF'+data],{type:'text/csv;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');link.href=url;link.download=`avqix-vzor-${channel}.csv`;link.click();
+    URL.revokeObjectURL(url);
   };
   const exportStrategy=()=>{
     const lines=[`AVQIX — Marketingová strategie: ${name}`,`Obchodní cíl: ${objective}`,`Datum: ${new Date().toLocaleDateString('cs-CZ')}`,'','DATOVÉ ZDROJE',
@@ -95,6 +109,7 @@ export function StrategyPage(){
     {channels.map(channel=><article key={channel} className="connector-card">
       <div className="connector-head"><div><strong>{channelNames[channel]}</strong><p>{reports[channel]?'Načteno '+reports[channel]!.rowCount+' řádků':'Čeká na první import'}</p></div></div>
       <p className="connector-note">{instructions[channel]}</p>
+      <div className="flex items-center gap-2 flex-wrap mb-3"><span className="text-xs text-muted-foreground rounded-full border px-2 py-1">API: čeká na autorizaci</span><Button size="sm" variant="outline" onClick={()=>exportTemplate(channel)}>Vzor CSV</Button></div>
       <label className="inline-flex flex-col gap-2 text-sm">Nahrát CSV
         <input aria-label={`CSV ${channelNames[channel]}`} type="file" accept=".csv,.txt,text/csv" onChange={e=>{importFile(channel,e.target.files?.[0]);e.target.value='';}} />
       </label>
@@ -107,6 +122,11 @@ export function StrategyPage(){
     <section className="reco-section">
       <SectionHeading title="Strategická doporučení" subtitle="Základ pro týdenní marketingový plán a vyhodnocení klienta" />
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4"><div><strong className="text-sm">{suggestions.length} doporučení</strong><p className="text-xs text-muted-foreground">{suggestions.filter(s=>s.priority==='Vysoká').length} vysoká priorita · návrhy vycházejí z dostupných dat</p></div><div className="flex flex-wrap gap-2">{(['Vše','Vysoká','Střední','Nízká'] as const).map(p=><Button key={p} size="sm" variant={priorityFilter===p?'default':'outline'} onClick={()=>setPriorityFilter(p)}>{p}</Button>)}</div></div>
+      <div className="rounded-xl border bg-background p-4 mb-4">
+        <h3 className="text-sm font-semibold">Akční pořadí na nejbližších 7 dní</h3>
+        <p className="text-xs text-muted-foreground mt-1">Orientační plán; připravuje se z dostupných dat, nikoli z plně autonomní AI.</p>
+        <ol className="mt-3 flex flex-col gap-3">{suggestions.slice(0,5).map((s,i)=><li key={s.title} className="flex gap-3 text-sm"><span className="font-semibold tabular-nums text-muted-foreground">{String(i+1).padStart(2,'0')}</span><span><strong>{s.title}</strong><span className="block text-muted-foreground mt-1">{s.action}</span></span></li>)}</ol>
+      </div>
       <div className="reco-grid">{visibleSuggestions.map((s,i)=><article className="reco-card" key={s.title+i}>
         <p className="text-sm">{s.priority} priorita</p><h3>{s.title}</h3><p>{s.explanation}</p><p><strong>Další krok:</strong> {s.action}</p>
       </article>)}</div>
