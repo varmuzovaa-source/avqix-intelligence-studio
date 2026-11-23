@@ -76,8 +76,8 @@ describe("local Fachman connector", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(bridgeStore.get().Studio?.map((set) => set.source)).toEqual(["google_ads", "meta_ads"]);
-    expect(bridgeStore.get().Studio?.every((set) => set.fetchedAt)).toBe(true);
+    expect(bridgeStore.get()["Studio"]?.map((set) => set.source)).toEqual(["google_ads", "meta_ads"]);
+    expect(bridgeStore.get()["Studio"]?.every((set) => set.fetchedAt)).toBe(true);
   });
 
   it("shows a useful local bridge error and does not replace current data", async () => {
@@ -106,6 +106,6 @@ describe("local Fachman connector", () => {
     });
 
     expect(result).toEqual({ ok: false, error: "Fachman není nainstalovaný" });
-    expect(bridgeStore.get().Studio).toEqual([original]);
+    expect(bridgeStore.get()["Studio"]).toEqual([original]);
   });
 });
