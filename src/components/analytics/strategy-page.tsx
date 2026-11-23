@@ -89,6 +89,11 @@ export function StrategyPage() {
   const connectedCount = channels.filter((c) => !!reports[c]).length;
   const taskKey = (title: string) => `strategy:${name}:${title}`;
   const sent = (title: string) => tasks.some((task) => task.sourceKey === taskKey(title));
+  const plannedDate = (priority: (typeof suggestions)[number]["priority"]) => {
+    const date = new Date();
+    date.setDate(date.getDate() + (priority === "Vysoká" ? 0 : priority === "Střední" ? 3 : 7));
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  };
   const addTask = (advice: (typeof suggestions)[number]) =>
     tasksStore.add({
       clientName: name,
@@ -99,6 +104,7 @@ export function StrategyPage() {
       recipient: "Marketing",
       impact: advice.explanation,
       priority: advice.priority,
+      dueDate: plannedDate(advice.priority),
     });
   const plan = buildAdvicePlan(suggestions);
   const { today, thisWeek, later } = plan;
@@ -183,6 +189,8 @@ export function StrategyPage() {
         `${i + 1}. [${s.priority}] ${s.title}`,
         s.explanation,
         `Akce: ${s.action}`,
+        ...s.steps.map((step, stepIndex) => `  ${stepIndex + 1}. ${step}`),
+        `Měřítko úspěchu: ${s.successMetric}`,
         "",
       ]),
       "Poznámka: data jsou agregovaná z jednotlivých exportů. Různá období a atribuční modely nemusí být přímo srovnatelné.",
