@@ -27,8 +27,15 @@ export function StrategyPage(){
   const [all,setAll]=useState<SnapshotState>({});
   const [errors,setErrors]=useState<Record<string,string>>({});
   const [objective,setObjective]=useState<'bookings'|'leads'|'sales'>('bookings');
+  const [priorityFilter,setPriorityFilter]=useState<'Vše'|'Vysoká'|'Střední'|'Nízká'>('Vše');
+  const [showSetup,setShowSetup]=useState(false);
   const reports=all[name] ?? {};
   const suggestions=recommendStrategy(reports,objective);
+  const visibleSuggestions=suggestions.filter(s=>priorityFilter==='Vše'||s.priority===priorityFilter);
+  const totalSpend=(reports.google_ads?.metrics.spend??0)+(reports.meta_ads?.metrics.spend??0);
+  const totalConversions=(reports.google_ads?.metrics.conversions??0)+(reports.meta_ads?.metrics.conversions??0);
+  const connectedCount=channels.filter(c=>!!reports[c]).length;
+  const metrics=[{label:'Investice do reklamy',value:totalSpend?totalSpend.toLocaleString('cs-CZ',{maximumFractionDigits:0})+' *':'—',info:'Součet nákladů Google + Meta'}, {label:'GA4 relace',value:reports.ga4?.metrics.sessions?.toLocaleString('cs-CZ')??'—',info:'Návštěvnost webu'}, {label:objective==='bookings'?'Rezervace': 'Konverze v reklamách',value:objective==='bookings'?(reports.reservations?.metrics.reservations?.toLocaleString('cs-CZ')??'—'):(totalConversions?totalConversions.toLocaleString('cs-CZ'):'—'),info:objective==='bookings'?'Počet rezervací z rezervačního systému':'Součet vykázaných konverzí, odlišná atribuce'}, {label:'E-mailing – odesláno',value:reports.email?.metrics.sent?.toLocaleString('cs-CZ')??'—',info:'Vykázané odeslané e-maily'}];
   const importFile=(channel:Channel,file:File|undefined)=>{
     if(!file)return;
     if(!/\.(csv|txt)$/i.test(file.name)){setErrors(s=>({...s,[channel]:'Použijte CSV soubor.'}));return;}
@@ -52,6 +59,16 @@ export function StrategyPage(){
     <PageHeader title="Strategie & integrace" description="Jeden přehled GA4, Google Ads, Meta Ads, e-mailingu a rezervací. Doporučení vycházejí z nahraných dat, ne z demo čísel." />
     {!isCustomClient(client) && <div className="info-banner">Vybraný pracovní prostor je ukázkový. Pro skutečná klientská data vytvořte vlastního klienta v sekci Klienti.</div>}
     <div className="info-banner">Přímé API konektory zatím nejsou zapnuté. Toto je funkční import agregovaných CSV a pravidlová strategie. Nahrané soubory se zpracují v prohlížeči, tato stránka je nesynchronizuje do cloudu. Po obnovení stránky je nutné nahrát je znovu.</div>
+    <section className="rounded-2xl border border-border/80 bg-card p-5 md:p-7 mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div><p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">AVQIX / Intelligence overview</p>
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mt-2">Marketing pod kontrolou.</h2>
+          <p className="text-sm text-muted-foreground mt-2">Výkonnost, datové zdroje a doporučené další kroky na jednom místě.</p></div>
+        <div className="rounded-xl border px-4 py-3 min-w-36"><p className="text-xs text-muted-foreground">Načtené datové zdroje</p><strong className="text-3xl tabular-nums">{connectedCount}<span className="text-base text-muted-foreground"> / 5</span></strong><div className="h-1.5 rounded-full bg-muted overflow-hidden mt-2"><div className="bg-primary h-full rounded-full transition-all" style={{width:`${connectedCount/5*100}%`}} /></div></div>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">{metrics.map(kpi=><div key={kpi.label} className="rounded-xl border bg-background p-4"><p className="text-xs text-muted-foreground">{kpi.label}</p><p className="text-xl md:text-2xl font-semibold tabular-nums mt-2">{kpi.value}</p><p className="text-xs text-muted-foreground mt-2">{kpi.info}</p></div>)}</div>
+      <p className="text-xs text-muted-foreground mt-3">* Měna je podle exportu. Náklady z různých měn nesčítejte. Importy musí pokrývat stejné období.</p>
+    </section>
     <section className="reco-section">
       <SectionHeading title="Obchodní cíl klienta" subtitle="Určuje priority marketingových doporučení" />
       <label htmlFor="strategy-objective">Optimalizovat na </label>
@@ -60,6 +77,8 @@ export function StrategyPage(){
       </select>
     </section>
     <section className="reco-section">
+      <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-semibold">Připravenost pro napojení</h2><p className="text-sm text-muted-foreground">Technické podmínky a autorizace pro 5 zdrojů</p></div><Button variant="outline" onClick={()=>setShowSetup(v=>!v)}>{showSetup?'Skrýt technické požadavky':'Zobrazit technické požadavky'}</Button></div>
+      {showSetup && <>
       <SectionHeading title="Připravenost pro prvního klienta" subtitle="Co přichystat k bezpečnému živému napojení. Stav importu neznamená aktivní API." />
       <p className="gsc-note">Autorizace a přístupové tokeny nikdy nevkládejte do tohoto formuláře, veřejného repozitáře ani do CSV. API konektory musí běžet na serveru, s oddělením dat klientů, obnovou tokenů a logem synchronizace.</p>
       <div className="reco-grid">{channels.map(channel=><article className="reco-card" key={channel}>
@@ -69,7 +88,7 @@ export function StrategyPage(){
         <p><strong>Přístupové údaje:</strong> {connectionRequirements[channel].credential}</p>
         <p><strong>Import CSV:</strong> {reports[channel] ? 'Otestován importem tohoto souboru' : 'Připraven k vyzkoušení'}</p>
         <p><strong>API:</strong> Nepřipojeno – vyžaduje autorizaci a skutečný integrační test</p>
-      </article>)}</div>
+      </article>)}</div></>}
     </section>
     <SectionHeading title="Datové zdroje" subtitle={`${channels.filter(c=>!!reports[c]).length} z 5 importováno · klient: ${name}`} />
     <div className="connector-grid">
@@ -87,7 +106,8 @@ export function StrategyPage(){
     </div>
     <section className="reco-section">
       <SectionHeading title="Strategická doporučení" subtitle="Základ pro týdenní marketingový plán a vyhodnocení klienta" />
-      <div className="reco-grid">{suggestions.map((s,i)=><article className="reco-card" key={s.title+i}>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4"><div><strong className="text-sm">{suggestions.length} doporučení</strong><p className="text-xs text-muted-foreground">{suggestions.filter(s=>s.priority==='Vysoká').length} vysoká priorita · návrhy vycházejí z dostupných dat</p></div><div className="flex flex-wrap gap-2">{(['Vše','Vysoká','Střední','Nízká'] as const).map(p=><Button key={p} size="sm" variant={priorityFilter===p?'default':'outline'} onClick={()=>setPriorityFilter(p)}>{p}</Button>)}</div></div>
+      <div className="reco-grid">{visibleSuggestions.map((s,i)=><article className="reco-card" key={s.title+i}>
         <p className="text-sm">{s.priority} priorita</p><h3>{s.title}</h3><p>{s.explanation}</p><p><strong>Další krok:</strong> {s.action}</p>
       </article>)}</div>
       <div className="mt-5"><Button onClick={exportStrategy}>Exportovat strategii</Button></div>
