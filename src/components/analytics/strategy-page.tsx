@@ -53,8 +53,8 @@ export function StrategyPage(){
     }).catch((error:unknown)=>setErrors(s=>({...s,[channel]:error instanceof Error?error.message:'Import se nezdařil'})));
   };
   const exportTemplate=(channel:Channel)=>{
-    const data=csvTemplates[channel].replaceAll('\\\\n','\\n');
-    const blob=new Blob(['\\uFEFF'+data],{type:'text/csv;charset=utf-8'});
+    const data=csvTemplates[channel].split(String.fromCharCode(92)+'n').join(String.fromCharCode(10));
+    const blob=new Blob([String.fromCharCode(0xfeff)+data],{type:'text/csv;charset=utf-8'});
     const url=URL.createObjectURL(blob);
     const link=document.createElement('a');link.href=url;link.download=`avqix-vzor-${channel}.csv`;link.click();
     URL.revokeObjectURL(url);
