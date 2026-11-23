@@ -19,6 +19,7 @@ import { Route as OrganikaRouteImport } from './routes/organika'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as ReportyRouteImport } from './routes/reporty'
 import { Route as SearchConsoleRouteImport } from './routes/search-console'
+import { Route as StrategieRouteImport } from './routes/strategie'
 import { Route as UkolyRouteImport } from './routes/ukoly'
 import { Route as WebRouteImport } from './routes/web'
 import { Route as ApiKlientiRouteImport } from './routes/api.klienti'
@@ -74,6 +75,11 @@ const SearchConsoleRoute = SearchConsoleRouteImport.update({
   path: '/search-console',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StrategieRoute = StrategieRouteImport.update({
+  id: '/strategie',
+  path: '/strategie',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UkolyRoute = UkolyRouteImport.update({
   id: '/ukoly',
   path: '/ukoly',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/profil': typeof ProfilRoute
   '/reporty': typeof ReportyRoute
   '/search-console': typeof SearchConsoleRoute
+  '/strategie': typeof StrategieRoute
   '/ukoly': typeof UkolyRoute
   '/web': typeof WebRoute
   '/api/klienti': typeof ApiKlientiRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/profil': typeof ProfilRoute
   '/reporty': typeof ReportyRoute
   '/search-console': typeof SearchConsoleRoute
+  '/strategie': typeof StrategieRoute
   '/ukoly': typeof UkolyRoute
   '/web': typeof WebRoute
   '/api/klienti': typeof ApiKlientiRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/profil': typeof ProfilRoute
   '/reporty': typeof ReportyRoute
   '/search-console': typeof SearchConsoleRoute
+  '/strategie': typeof StrategieRoute
   '/ukoly': typeof UkolyRoute
   '/web': typeof WebRoute
   '/api/klienti': typeof ApiKlientiRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/profil'
     | '/reporty'
     | '/search-console'
+    | '/strategie'
     | '/ukoly'
     | '/web'
     | '/api/klienti'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/profil'
     | '/reporty'
     | '/search-console'
+    | '/strategie'
     | '/ukoly'
     | '/web'
     | '/api/klienti'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/profil'
     | '/reporty'
     | '/search-console'
+    | '/strategie'
     | '/ukoly'
     | '/web'
     | '/api/klienti'
@@ -206,6 +218,7 @@ export interface RootRouteChildren {
   ProfilRoute: typeof ProfilRoute
   ReportyRoute: typeof ReportyRoute
   SearchConsoleRoute: typeof SearchConsoleRoute
+  StrategieRoute: typeof StrategieRoute
   UkolyRoute: typeof UkolyRoute
   WebRoute: typeof WebRoute
   ApiKlientiRoute: typeof ApiKlientiRoute
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchConsoleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/strategie': {
+      id: '/strategie'
+      path: '/strategie'
+      fullPath: '/strategie'
+      preLoaderRoute: typeof StrategieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ukoly': {
       id: '/ukoly'
       path: '/ukoly'
@@ -326,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfilRoute: ProfilRoute,
   ReportyRoute: ReportyRoute,
   SearchConsoleRoute: SearchConsoleRoute,
+  StrategieRoute: StrategieRoute,
   UkolyRoute: UkolyRoute,
   WebRoute: WebRoute,
   ApiKlientiRoute: ApiKlientiRoute,
