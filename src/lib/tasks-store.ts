@@ -10,6 +10,7 @@ export const statusLabels: Record<TaskStatus, string> = { todo: 'K řešení', d
 
 export type Task = {
   id: string;
+  clientName?: string;
   /** Stable key of the recommendation it came from, used to avoid duplicates. */
   sourceKey: string;
   title: string;
@@ -19,11 +20,12 @@ export type Task = {
   impact: string;
   priority: 'Vysoká' | 'Střední' | 'Nízká';
   owner: string;
+  dueDate?: string;
   status: TaskStatus;
   createdAt: string;
 };
 
-export type NewTask = Pick<Task, 'sourceKey' | 'title' | 'action' | 'source' | 'recipient' | 'impact' | 'priority'>;
+export type NewTask = Pick<Task, 'sourceKey' | 'title' | 'action' | 'source' | 'recipient' | 'impact' | 'priority'> & { clientName?: string; dueDate?: string };
 
 const KEY = 'avqix-tasks-v1';
 const listeners = new Set<() => void>();
@@ -52,7 +54,7 @@ export const tasksStore = {
     commit([{ ...input, id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, owner: '', status: 'todo', createdAt: new Date().toISOString() }, ...state]);
     return true;
   },
-  update(id: string, patch: Partial<Pick<Task, 'owner' | 'status'>>) { commit(state.map(t => (t.id === id ? { ...t, ...patch } : t))); },
+  update(id: string, patch: Partial<Pick<Task, 'owner' | 'status' | 'dueDate'>>) { commit(state.map(t => (t.id === id ? { ...t, ...patch } : t))); },
   remove(id: string) { commit(state.filter(t => t.id !== id)); },
   /** Test helper. */
   reset(next: Task[] = []) { commit(next); },

@@ -19,6 +19,13 @@ describe('tasks store', () => {
     tasksStore.remove(id);
     expect(tasksStore.get()).toHaveLength(0);
   });
+  it('stores and updates a due date for planned work', () => {
+    tasksStore.add({ ...input('k-date'), dueDate: '2026-11-26' });
+    const id = tasksStore.get()[0]!.id;
+    expect(tasksStore.get()[0]?.dueDate).toBe('2026-11-26');
+    tasksStore.update(id, { dueDate: '2026-11-27' });
+    expect(tasksStore.get()[0]?.dueDate).toBe('2026-11-27');
+  });
   it('persists to localStorage', () => {
     tasksStore.add(input('k3'));
     expect(JSON.parse(localStorage.getItem('avqix-tasks-v1') ?? '[]')).toHaveLength(1);

@@ -17,18 +17,20 @@ import { bridgeSourceLabel, bridgeStore, useBridge } from '@/lib/campaign-data';
 import { parseFachmanJson } from '@/lib/fachman-bridge';
 import { clients } from '@/lib/analytics-data';
 import { useWorkspace } from './workspace';
+import { GettingStarted } from './getting-started';
 
 const nextSteps = [
-  { title: '1. Začněte Search Console', text: 'Je to jediný zdroj, který aplikace už umí vyhodnotit. Stáhněte export Dotazy a Stránky a nahrajte ho na stránce Search Console.' },
+  { title: '1. Začněte Search Console', text: 'Začněte exportem Dotazy a Stránky ze Search Console. Aplikace umí z CSV najít příležitosti pro SEO.' },
   { title: '2. Přidejte předchozí období', text: 'Druhý export za stejně dlouhé minulé období odemkne hledání poklesů.' },
-  { title: '3. Ostatní zdroje zatím jen zkontrolujte', text: 'Meta Ads, Google Ads, GA4, YouTube a e-mailing zatím jen ověří sloupce. Vyplatí se zjistit, jestli váš export vychází, než se postaví napojení.' },
+  { title: '3. Ostatní zdroje zatím jen zkontrolujte', text: 'Pro Meta Ads a Google Ads lze použít import Fachman JSON nebo lokální most, pokud je nastaven. E-mailing CSV se analyzuje; ostatní CSV zdroje mohou sloužit jen ke kontrole sloupců.' },
 ];
 type Check = { fileName: string; check: ColumnCheck; preview: string[][]; rowCount: number; stored: boolean; errors: string[] };
 
 export function DataSourcesPage() {
   return <main className="page-content">
-    <PageHeader title="Datové zdroje" description="Konektory jako zásuvné moduly. Zatím je žádný není připojený." />
-    <div className="info-banner"><ShieldCheck size={18} /><span>Prototyp běží lokálně. Nic se nepřipojuje k externím účtům a žádná data se neodesílají. CSV soubory se čtou jen v prohlížeči.</span></div>
+    <PageHeader title="Datové zdroje" description="Importujte dostupné soubory a ověřte, které zdroje jsou skutečně načtené." />
+    <div className="info-banner"><ShieldCheck size={18} /><span>CSV soubory se zpracovávají v prohlížeči. Lokální most Fachman může načítat reklamní data jen při nastavených oprávněních a lokálním spuštění; veřejné demo nemá přímé připojení reklamních účtů.</span></div>
+    <GettingStarted />
     <SectionHeading title="Konektory" subtitle={`${connectors.length} modulů · ${connectors.filter(c => c.status === 'connected').length} připojeno`} />
     <section className="reco-section"><SectionHeading title="Co udělat dál" subtitle="Doporučený postup pro napojení dat" />
       <div className="reco-grid">{nextSteps.map(r => <article key={r.title} className="reco-card"><h3><Lightbulb size={15} />{r.title}</h3><p>{r.text}</p></article>)}</div></section>

@@ -14,11 +14,11 @@ export function TasksPage() {
   const owners = useMemo(() => ['Všichni', ...Array.from(new Set(tasks.map(t => t.owner.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'cs'))], [tasks]);
   const shown = tasks.filter(t => owner === 'Všichni' || t.owner.trim() === owner);
   const count = (s: TaskStatus) => tasks.filter(t => t.status === s).length;
-  const exportTasks = () => downloadCsv('avqix-ukoly-tymu.csv', ['Úkol', 'Zdroj', 'Priorita', 'Předat', 'Řeší', 'Stav', 'Dopad', 'Co udělat'], tasks.map(t => [t.title, t.source, t.priority, t.recipient, t.owner || '—', statusLabels[t.status], t.impact, t.action]));
+  const exportTasks = () => downloadCsv('avqix-ukoly-tymu.csv', ['Úkol', 'Zdroj', 'Priorita', 'Termín', 'Předat', 'Řeší', 'Stav', 'Dopad', 'Co udělat'], tasks.map(t => [t.title, t.source, t.priority, t.dueDate || '—', t.recipient, t.owner || '—', statusLabels[t.status], t.impact, t.action]));
 
   return <main className="page-content">
     <PageHeader title="Úkoly týmu" description="Co je potřeba udělat, kdo to řeší a v jakém je to stavu." />
-    <div className="info-banner"><Users size={18} /><span>Úkoly vznikají tlačítkem Předat u doporučení. Ukládají se jen v tomto prohlížeči, kolegové je zatím neuvidí. Pro sdílení v týmu použijte Export CSV.</span></div>
+    <div className="info-banner"><Users size={18} /><span>Úkoly vznikají tlačítkem Předat u doporučení. Úkoly vlastních klientů se automaticky ukládají do vašeho účtu. Týmové sdílení zatím není dostupné.</span></div>
 
     <div className="metrics-grid">
       <article className="metric-card"><div className="metric-label">Všechny úkoly</div><div className="metric-value">{tasks.length}</div></article>
@@ -43,6 +43,7 @@ function TaskCard({ task }: { task: Task }) {
     <div className="reco-top"><span className={`reco-priority p-${task.priority === 'Vysoká' ? 'high' : task.priority === 'Střední' ? 'mid' : 'low'}`}>{task.priority}</span><small>{task.source}</small></div>
     <h3>{task.title}</h3>
     <p className="reco-action"><strong>Co udělat:</strong> {task.action}</p>
+    <label className="task-owner">Termín<input type="date" value={task.dueDate ?? ''} onChange={e => tasksStore.update(task.id, { dueDate: e.target.value })} /></label>
     <p className="gsc-note">Předat: {task.recipient} · {task.impact}</p>
     <label className="task-owner">Řeší<input value={task.owner} placeholder="Jméno kolegy" onChange={e => tasksStore.update(task.id, { owner: e.target.value })} /></label>
     <div className="task-actions">

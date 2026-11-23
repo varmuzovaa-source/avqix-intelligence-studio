@@ -1,3 +1,4 @@
+import { CloudSyncProvider } from "@/components/analytics/cloud-sync";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -122,7 +123,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Workspace><Outlet /></Workspace>
+      <CloudSyncProvider><Workspace><Outlet /></Workspace></CloudSyncProvider>
     </QueryClientProvider>
   );
 }

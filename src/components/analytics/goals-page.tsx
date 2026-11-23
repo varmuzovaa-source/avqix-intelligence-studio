@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, ClipboardCopy, FileText, Lightbulb, Plus, RefreshCw, Send, Target, Trash2, Upload } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
@@ -52,13 +52,13 @@ export function GoalsPage() {
     {dataInfo.origin === 'none' ? <div className="info-banner"><Target size={18} /><span>Pro klienta {name} zatím nejsou žádná čísla z kampaní. Nejdřív si můžete nastavit cíle. Čísla získáte takto: ve složce avqix-intelligence-studio spusťte <code>python3 scripts/most_fachman.py {slug} --google 123-456-7890 --meta act_123456 --dny 30</code> (ID účtů doplňte vlastní, stačí jen jedno) a soubory ze složky data-most nahrajte na stránce <Link to="/datove-zdroje" className="gsc-link">Datové zdroje</Link>.</span></div>
       : <div className="info-banner"><Target size={18} /><span>{dataLabel === 'Ukázková data' ? 'Zatím počítám s ukázkovými daty, žádná čísla nejsou skutečná. Skutečná čísla z Fachmana nahrajete na stránce ' : `${dataLabel} nahrazují ukázková čísla pro klienta ${name}. Další zdroje najdete na stránce `}<Link to="/datove-zdroje" className="gsc-link">Datové zdroje</Link>.</span></div>}
 
-    {isCustomClient(client) && <LiveConnect key={`live-${name}`} name={name} slug={slug} hasData={dataInfo.origin === 'fachman'} defaultDays={goals.kpis[0]?.periodDays ?? 30} />}
+    {isCustomClient(client) && <LiveConnect key={`live-${name}`} name={name} slug={slug} defaultDays={goals.kpis[0]?.periodDays ?? 30} />}
 
     <GoalForm key={name} name={name} goals={goals} model={model} />
 
     <section className="reco-section">
       <SectionHeading title="Jak daleko jsme" subtitle="Skutečnost proti cíli" />
-      {progress.length === 0 ? <div className="info-banner"><Target size={18} /><span>Zatím tu není žádný cíl. Přidejte aspoň jedno číslo výše a uložte.</span></div>
+      {progress.length === 0 ? <div className="info-banner"><Target size={18} /><span>Zatím nemáte číselné KPI. Textové cíle můžete uložit i bez něj.</span></div>
         : <div className="goal-progress-grid">{progress.map(p => <ProgressCard key={p.goal.id} p={p} conversion={model.vocab.conversion} />)}</div>}
     </section>
 
@@ -72,7 +72,7 @@ export function GoalsPage() {
         <p><strong>Proč:</strong> {a.insight}</p>
         <p className="reco-action"><strong>Co udělat:</strong> {a.action}</p>
         <div className="reco-foot"><div><small>PŘEDAT</small><strong>{a.recipient}</strong><span className="reco-audience">{a.audience === 'Klient' ? 'Pro klienta' : 'Interní tým'} · {a.impact}</span></div>
-          <Button size="sm" variant={sent(a) ? 'ghost' : 'outline'} disabled={sent(a)} onClick={() => tasksStore.add({ sourceKey: sourceKey(a), title: a.title, action: a.action, source: `${name} · cíl ${metricInfo[a.metric].code} · ${a.channel}`, recipient: a.recipient, impact: a.impact, priority: a.priority })}>{sent(a) ? <><Check />Předáno</> : <><Send />Předat</>}</Button></div>
+          <Button size="sm" variant={sent(a) ? 'ghost' : 'outline'} disabled={sent(a)} onClick={() => tasksStore.add({ clientName: name, sourceKey: sourceKey(a), title: a.title, action: a.action, source: `${name} · cíl ${metricInfo[a.metric].code} · ${a.channel}`, recipient: a.recipient, impact: a.impact, priority: a.priority })}>{sent(a) ? <><Check />Předáno</> : <><Send />Předat</>}</Button></div>
       </article>)}</div>
     </section>
   </main>;
@@ -97,7 +97,7 @@ function GoalForm({ name, goals, model }: { name: string; goals: ClientGoals; mo
   const modelKey = (Object.keys(clientConfigKeys) as (keyof typeof clientConfigKeys)[]).find(k => clientConfigKeys[k] === model) ?? 'ecommerce';
   const setKpi = (id: string, patch: Partial<KpiGoal>) => setDraft(d => ({ ...d, kpis: d.kpis.map(k => (k.id === id ? { ...k, ...patch } : k)) }));
   const info = (m: GoalMetric) => metricInfo[m];
-  const save = () => { goalsStore.save(name, { ...draft, kpis: draft.kpis.filter(k => k.target > 0) }); setMsg('Uloženo v tomto prohlížeči.'); };
+  const save = () => { goalsStore.save(name, { ...draft, kpis: draft.kpis.filter(k => k.target > 0) }); setMsg('Cíle byly uloženy. Pro vlastního klienta se automaticky odesílají do cloudu; stav najdete nahoře.'); };
   const copy = async () => {
     const text = goalsToMarkdown(name, draft);
     try { await navigator.clipboard.writeText(text); setMsg('Zkopírováno. Vložte to do části „2. Cíle (KPI)“ souboru ppc.md klienta.'); } catch { setMsg('Kopírování se nepovedlo, zkuste to znovu.'); }
@@ -128,7 +128,7 @@ function GoalForm({ name, goals, model }: { name: string; goals: ClientGoals; mo
         <CsvPicker label="Načíst z ppc.md" accept=".md,.txt,text/markdown,text/plain" onText={t => load(t)} icon={<Upload />} />
       </div>
       {msg && <p className="goal-help" role="status">{msg}</p>}
-      <p className="goal-help">Cíle se ukládají jen v tomto prohlížeči. Aby je znal i Fachman, zkopírujte je a vložte do souboru ppc.md klienta.</p>
+      <p className="goal-help">U vlastního klienta se uložené cíle automaticky synchronizují. Číselné KPI přidáte tlačítkem Přidat číslo.</p>
     </div>
   </section>;
 }
@@ -136,7 +136,7 @@ function GoalForm({ name, goals, model }: { name: string; goals: ClientGoals; mo
 import { modelConfigs } from '@/lib/business-models';
 const clientConfigKeys = modelConfigs;
 
-function LiveConnect({ name, slug, hasData, defaultDays }: { name: string; slug: string; hasData: boolean; defaultDays: number }) {
+function LiveConnect({ name, slug, defaultDays }: { name: string; slug: string; defaultDays: number }) {
   useCustomClients();
   const c = customClientOf(clients.indexOf(name));
   const bridge = useBridge();
@@ -144,18 +144,15 @@ function LiveConnect({ name, slug, hasData, defaultDays }: { name: string; slug:
   const [days, setDays] = useState<number>(defaultDays);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
-  const auto = useRef(false);
   const google = c?.googleId ?? '', meta = c?.metaId ?? '';
   const fetchedAt = (bridge[name] ?? []).map(d => d.fetchedAt).filter(Boolean).sort().at(-1);
   const run = async () => {
     setBusy(true); setMsg('Stahuji data z Fachmana, může to trvat až minutu…');
     const r = await refreshFromFachman(name, { slug, days, ...(google ? { google } : {}), ...(meta ? { meta } : {}) });
     setBusy(false);
-    setMsg(r.ok ? `Hotovo, načteno: ${r.loaded.join(', ')}.` : r.error);
+    setMsg(r.ok ? `Hotovo: ${r.loaded.join(', ')}. Kampaně jsou připravené v přehledu a cílech.` : r.error);
   };
   useEffect(() => { void liveAvailable().then(setAvailable); }, []);
-  // Fetch once when the client is opened and nothing is loaded yet (one call, never in a loop, to respect API limits).
-  useEffect(() => { if (available && !hasData && (google || meta) && !auto.current) { auto.current = true; void run(); } }, [available]); // eslint-disable-line react-hooks/exhaustive-deps
   return <section className="reco-section">
     <SectionHeading title="Napojení na reklamní účty" subtitle="Čísla se stáhnou z Fachmana jedním kliknutím" />
     <div className="goal-form">
@@ -163,12 +160,13 @@ function LiveConnect({ name, slug, hasData, defaultDays }: { name: string; slug:
         <label>Google Ads ID (nepovinné)<input value={google} placeholder="123-456-7890" onChange={e => clientsStore.update(name, { googleId: e.target.value.trim() })} /></label>
         <label>Meta Ads ID (nepovinné)<input value={meta} placeholder="act_123456" onChange={e => clientsStore.update(name, { metaId: e.target.value.trim() })} /></label>
       </div>
-      {available === false && <p className="goal-help">Tlačítko funguje jen když appku spustíte přes Spustit-AVQIX na svém počítači. Tady můžete čísla nahrát ručně na stránce Datové zdroje.</p>}
+      {available === false && <p className="goal-help">Přímé načtení je dostupné jen při spuštění AVQIX z počítače přes <code>Spustit-AVQIX.command</code>. Online preview nemá přístup k Fachmanovi. V preview můžete importovat výstupní JSON na stránce <Link to="/datove-zdroje" className="gsc-link">Datové zdroje</Link>.</p>}
       {available && <div className="gsc-actions">
         <label className="gsc-threshold">Období <select className="task-select" value={days} onChange={e => setDays(Number(e.target.value))}>{goalPeriods.map(p => <option key={p.days} value={p.days}>{p.label}</option>)}</select></label>
         <Button size="sm" disabled={busy || (!google && !meta)} onClick={() => void run()}><RefreshCw />Aktualizovat z Fachmana</Button>
         {!google && !meta && <span className="goal-help">Nejdřív doplňte aspoň jedno ID.</span>}
       </div>}
+      {available && <p className="goal-help">Načtení je pouze pro čtení. Data se stáhnou lokálně z Fachmana; reklamní účty se nemění.</p>}
       {fetchedAt && <p className="goal-help">Data stažena: {new Date(fetchedAt).toLocaleString('cs-CZ')}. Jsou z tohoto okamžiku, dalším kliknutím se obnoví.</p>}
       {msg && <p className="goal-help" role="status">{msg}</p>}
     </div>
