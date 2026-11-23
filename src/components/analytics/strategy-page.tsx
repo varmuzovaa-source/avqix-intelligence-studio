@@ -13,6 +13,13 @@ meta_ads:'Meta Ads Manager → Export CSV: Amount spent, Results, Link clicks, I
 email:'Ecomail / jiný e-mailing → export agregovaných statistik kampaní: Sent, Opens, Clicks, Unsubscribes.',
 reservations:'Rezervační systém → souhrnný CSV export: Reservations / Rezervace, Guests / Počet hostů, Cancellations / Storna. Bez jmen, telefonů či e-mailových adres hostů.'
 };
+const connectionRequirements:Record<Channel,{access:string;automation:string;credential:string}> = {
+ga4:{access:'Google Analytics 4 → role Čtenář / Viewer + ID GA4 property',automation:'Google Analytics Data API; bezpečná serverová autorizace přes OAuth / servisní účet',credential:'OAuth / servisní účet výhradně na serveru'},
+google_ads:{access:'Přístup do reklamního účtu (ideálně read-only), Customer ID a případně MCC',automation:'Google Ads API včetně developer tokenu a Google OAuth, alternativně lokální Fachman',credential:'Google OAuth token + developer token (serverové tajemství)'},
+meta_ads:{access:'Meta Business portfolio, reklamní účet a oprávnění číst Insights',automation:'Meta Marketing API, autorizace Business app a systémový uživatel / OAuth',credential:'Meta access token (serverové tajemství)'},
+email:{access:'Ecomail účet s oprávněním pro statistiky kampaní; jiný poskytovatel dle API',automation:'Ecomail API nebo zabezpečené stahování agregovaných exportů',credential:'API klíč Ecomail (serverové tajemství)'},
+reservations:{access:'Název rezervačního systému + přístup ke statistikám a souhrnnému exportu',automation:'API / webhook, případně naplánovaný anonymizovaný CSV export podle dodavatele',credential:'API klíč / webhook secret pouze na serveru'}
+};
 type SnapshotState=Record<string,Partial<Record<Channel,ChannelReport>>>;
 export function StrategyPage(){
   const {client}=useWorkspace();
@@ -51,6 +58,18 @@ export function StrategyPage(){
       <select id="strategy-objective" value={objective} onChange={e=>setObjective(e.target.value as typeof objective)} className="rounded-md border bg-background p-2 ml-2">
         <option value="bookings">Rezervace</option><option value="leads">Poptávky / leady</option><option value="sales">Tržby / prodeje</option>
       </select>
+    </section>
+    <section className="reco-section">
+      <SectionHeading title="Připravenost pro prvního klienta" subtitle="Co přichystat k bezpečnému živému napojení. Stav importu neznamená aktivní API." />
+      <p className="gsc-note">Autorizace a přístupové tokeny nikdy nevkládejte do tohoto formuláře, veřejného repozitáře ani do CSV. API konektory musí běžet na serveru, s oddělením dat klientů, obnovou tokenů a logem synchronizace.</p>
+      <div className="reco-grid">{channels.map(channel=><article className="reco-card" key={channel}>
+        <h3>{channelNames[channel]}</h3>
+        <p><strong>Co získat:</strong> {connectionRequirements[channel].access}</p>
+        <p><strong>Živá synchronizace:</strong> {connectionRequirements[channel].automation}</p>
+        <p><strong>Přístupové údaje:</strong> {connectionRequirements[channel].credential}</p>
+        <p><strong>Import CSV:</strong> {reports[channel] ? 'Otestován importem tohoto souboru' : 'Připraven k vyzkoušení'}</p>
+        <p><strong>API:</strong> Nepřipojeno – vyžaduje autorizaci a skutečný integrační test</p>
+      </article>)}</div>
     </section>
     <SectionHeading title="Datové zdroje" subtitle={`${channels.filter(c=>!!reports[c]).length} z 5 importováno · klient: ${name}`} />
     <div className="connector-grid">
