@@ -35,6 +35,7 @@ export function parseChannelReport(channel:Channel,csv:string,fileName:string,up
   if(!count) throw new Error('Soubor neobsahuje čitelné číselné metriky');
   return {channel,fileName:fileName.slice(0,150),updatedAt,rowCount:count,metrics};
 }
+const goalHasRevenue=(goal:'bookings'|'leads'|'sales')=>goal==='sales';
 export function recommendStrategy(reports:Partial<Record<Channel,ChannelReport>>,objective:'bookings'|'leads'|'sales'='bookings'):Advice[]{
   const advice:Advice[]=[];
   const add=(priority:Advice['priority'],title:string,explanation:string,action:string)=>advice.push({priority,title,explanation,action});
@@ -54,6 +55,15 @@ export function recommendStrategy(reports:Partial<Record<Channel,ChannelReport>>
   }
   const email=reports.email?.metrics;
   if(email?.sent && email.clicks!==undefined && email.clicks/email.sent<.01) add('Střední','Zvýšit prokliky z e-mailů',`CTR je ${(100*email.clicks/email.sent).toFixed(2)} %.`,'Testujte segmentaci, hlavní CTA a obsah po jednotlivých kampaních.');
+  const sessions=reports.ga4?.metrics.sessions;
+  const keyEvents=reports.ga4?.metrics.conversions;
+  if(sessions && sessions>=100 && keyEvents!==undefined && keyEvents/sessions<.01) add('Vysoká','Zlepšit konverzní cestu',`GA4 vykazuje ${(100*keyEvents/sessions).toFixed(2)} klíčových událostí na 100 relací; nejde automaticky o konverzní poměr uživatelů.`,'Ověřte definici key events, rychlost webu, formuláře a průchod rezervací. A/B testujte vstupní stránku.');
+  if(sessions && sessions>=100 && keyEvents!==undefined && keyEvents/sessions>=.05) add('Nízká','Rozšířit úspěšné vstupní stránky','Poměr klíčových událostí k relacím je relativně vysoký, závisí však na jejich definici.','Rozdělte report GA4 podle landing page a zdroje. Navyšujte rozpočet teprve po kontrole kvality událostí.');
+  if(email?.sent && email.unsubscribes!==undefined && email.unsubscribes/email.sent>.005) add('Vysoká','Prověřit odhlašování z e-mailů',`Odhlášení tvoří ${(email.unsubscribes/email.sent*100).toFixed(2)} % odeslaných e-mailů.`,'Zkontrolujte souhlasy, frekvenci rozesílek, segmentaci a relevance obsahu.');
+  if(email?.sent && email.opens!==undefined && email.opens/email.sent<.15) add('Střední','Zkontrolovat doručitelnost',`Orientační míra otevření je ${(100*email.opens/email.sent).toFixed(1)} %; může být zkreslena ochranou soukromí.`,'Prověřte SPF, DKIM, DMARC, reputaci domény, segmenty a výkon prokliků.');
+  if(reports.google_ads && reports.meta_ads) add('Střední','Srovnat efektivitu kanálů','K dispozici jsou výsledky Google Ads i Meta Ads, ale jejich atribuce se může překrývat.','Vytvořte jednotné UTM, pojmenujte konverze a srovnejte kanály s GA4 a CRM / rezervacemi.');
+  if(reports.ga4 && reports.email && goalHasRevenue(objective)) add('Střední','Propojit akviziční a retenční výkon','Jsou dostupná data webu a e-mailingu, ale bez společné identity objednávek nelze přesně připsat tržby.','Označte e-mailové odkazy UTM a měřte retenci a opakované nákupy v souladu se souhlasy.');
+  if(objective==='bookings' && reports.reservations && !reports.ga4) add('Střední','Měřit dokončenou rezervaci','Rezervace evidujeme, ale chybí pohled na cestu návštěvníka.','Nastavte event booking_complete a propojte jej s potvrzovací stránkou bez osobních údajů.');
   if(objective==='bookings' && booked>0 && !reports.email) add('Nízká','Nastavit retenční e-mailing','Rezervace existují, ale nejsou data o návratu hostů.','S potřebným souhlasem připravte follow-up a nabídku opakované návštěvy.');
   if(!advice.length) add('Nízká','Týdenní kontrola výkonu','Na dostupných agregovaných datech není jednoznačný varovný signál.','Doplňte cíle KPI a porovnávejte stejná období.');
   return advice.sort((a,b)=>({Vysoká:0,Střední:1,Nízká:2}[a.priority]-{Vysoká:0,Střední:1,Nízká:2}[b.priority]));
