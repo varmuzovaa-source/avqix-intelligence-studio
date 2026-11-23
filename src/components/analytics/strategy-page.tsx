@@ -245,6 +245,19 @@ export function StrategyPage() {
                 <p className="strategy-action">
                   <strong>Konkrétně:</strong> {s.action}
                 </p>
+                <div className="strategy-detail">
+                  <strong>Postup krok za krokem</strong>
+                  <ol>
+                    {s.steps.map((step, stepIndex) => (
+                      <li key={step}>
+                        {stepIndex + 1}. {step}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                <p className="strategy-success">
+                  <strong>Jak poznat výsledek:</strong> {s.successMetric}
+                </p>
                 <Button
                   size="sm"
                   variant={sent(s.title) ? "ghost" : "default"}
@@ -508,6 +521,19 @@ export function StrategyPage() {
               <p>
                 <strong>Další krok:</strong> {s.action}
               </p>
+              <details className="strategy-details">
+                <summary>Zobrazit konkrétní postup a měřítko úspěchu</summary>
+                <ol>
+                  {s.steps.map((step, stepIndex) => (
+                    <li key={step}>
+                      {stepIndex + 1}. {step}
+                    </li>
+                  ))}
+                </ol>
+                <p>
+                  <strong>Jak poznat výsledek:</strong> {s.successMetric}
+                </p>
+              </details>
               <Button
                 size="sm"
                 variant="outline"
