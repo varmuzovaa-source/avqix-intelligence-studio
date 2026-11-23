@@ -76,7 +76,10 @@ describe("local Fachman connector", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(bridgeStore.get()["Studio"]?.map((set) => set.source)).toEqual(["google_ads", "meta_ads"]);
+    expect(bridgeStore.get()["Studio"]?.map((set) => set.source)).toEqual([
+      "google_ads",
+      "meta_ads",
+    ]);
     expect(bridgeStore.get()["Studio"]?.every((set) => set.fetchedAt)).toBe(true);
   });
 
