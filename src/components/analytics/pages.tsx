@@ -20,8 +20,7 @@ import { gscRecommendations } from '@/lib/gsc-store';
 import { gscReportRows } from '@/lib/search-console';
 import { clients, demoClients, modelLabels, getModelKpis, getAnalytics, money, number, downloadCsv, getKeywords, getRecommendations } from '@/lib/analytics-data';
 export function OverviewPage() {
- const {client}=useWorkspace();
- return <main className="page-content"><PageHeader title="Přehled výkonu" description="Váš marketing v souvislostech. Všechno důležité na jednom místě."/><Metrics/><div className="insight-strip"><span className="insight-icon"><Sparkles size={17}/></span><strong>Za čísly je příležitost.</strong><span>{clients[client]}: remarketing dosahuje ROAS {(6.18 + client * .12).toFixed(2).replace('.', ',')}×. Zvažte přesun části rozpočtu z prospectingu.</span><Button asChild variant="ghost" size="sm"><Link to="/kampane">Prozkoumat<ArrowUpRight/></Link></Button></div><div className="charts-grid"><PerformanceChart/><ChannelChart/></div><CampaignTable compact/><Recommendations areas={['keywords','google','meta','crm']} title="Doporučení napříč kanály"/><Creatives/></main>;
+ return <main className="page-content"><PageHeader title="Přehled výkonu" description="Nejdůležitější výsledky a doporučené další kroky."/><div className="info-banner"><Sparkles size={18}/><span><strong>Ukázkový přehled</strong> · čísla i doporučení níže jsou smyšlená a slouží k prohlídce funkcí. Pro práci se skutečnými daty <Link to="/klienti" className="gsc-link">přidejte nebo vyberte klienta</Link>.</span></div><Metrics/><Recommendations areas={['keywords','google','meta','crm']} title="Co udělat dál"/><div className="charts-grid"><PerformanceChart/><ChannelChart/></div><CampaignTable compact/></main>;
 }
 export function OrganicPage() {
  const {client,period}=useWorkspace();const data=getAnalytics(client,period);

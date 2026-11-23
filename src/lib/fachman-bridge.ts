@@ -85,7 +85,7 @@ function metaCampaigns(rows: Obj[]): Parsed {
 
 export function parseFachmanJson(text: string, fileName: string): BridgeParse {
   let data: unknown;
-  try { data = JSON.parse(text.replace(/^\uFEFF/, '')); } catch { return { ok: false, errors: ['Soubor není platný JSON. Vytvořte ho skriptem scripts/most-fachman.sh.'] }; }
+  try { data = JSON.parse(text.replace(/^\uFEFF/, '')); } catch { return { ok: false, errors: ['Soubor není platný JSON. Vytvořte ho tlačítkem Aktualizovat z Fachmana, nebo příkazem python3 scripts/most_fachman.py.'] }; }
   const rows = Array.isArray(data) ? data : isObj(data) && Array.isArray(data['data']) ? data['data'] : null;
   if (!rows) return { ok: false, errors: ['Soubor nemá očekávaný tvar (seznam kampaní). Zkontrolujte, že obsahuje výstup z Fachmana, ne chybovou hlášku.'] };
   const objects = rows.filter(isObj);
