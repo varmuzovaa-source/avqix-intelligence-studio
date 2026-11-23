@@ -6,6 +6,8 @@ const advice = (priority: Advice["priority"], title: string): Advice => ({
   title,
   explanation: `Proč ${title}`,
   action: `Akce ${title}`,
+  steps: [`Postup ${title}`],
+  successMetric: `Měřítko ${title}`,
 });
 
 describe("buildAdvicePlan", () => {
