@@ -119,3 +119,180 @@ button { box-shadow:none!important; } a { text-decoration:none; } select { curso
 .goal-channels {display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--muted-foreground);}
 .goal-why {font-size:11px;color:var(--muted-foreground);margin:0 0 8px;}
 @media(max-width:900px) { .goal-text-grid,.goal-progress-grid {grid-template-columns:1fr;} .goal-kpi-row {grid-template-columns:1fr 1fr;} }
+
+/* =====================================================================
+   Vizuální vylepšení (listopad 2026): čitelnost, hloubka, jemné detaily.
+   Jen vzhled, žádná změna funkcí. Vše přes sémantické tokeny výše.
+   Blok je záměrně na konci souboru, aby přebil starší pravidla.
+   ===================================================================== */
+:root {
+ --muted-foreground: oklch(.5 0 0);
+ --border: oklch(.915 .002 106);
+ --radius-card: 14px;
+ --radius-control: 10px;
+ --shadow-card: 0 1px 2px oklch(.205 0 0 / .04), 0 6px 20px oklch(.205 0 0 / .035);
+ --shadow-card-hover: 0 2px 4px oklch(.205 0 0 / .05), 0 10px 28px oklch(.205 0 0 / .07);
+ --row-hover: color-mix(in oklch, var(--soft-lime) 55%, var(--card));
+}
+::selection { background:var(--primary); color:var(--foreground); }
+body { font-size:14px; line-height:1.5; font-variant-numeric:tabular-nums; text-rendering:optimizeLegibility; }
+h1,h2,h3 { letter-spacing:-.015em; }
+:focus-visible { outline:2px solid var(--foreground); outline-offset:2px; border-radius:6px; }
+input:focus,select:focus { outline:2px solid var(--primary); outline-offset:2px; }
+button,a,input,select { transition:background 180ms,color 180ms,border-color 180ms,box-shadow 180ms,transform 180ms; }
+* { scrollbar-width:thin; scrollbar-color:color-mix(in oklch,var(--foreground) 22%,transparent) transparent; }
+
+/* Postranní panel */
+.workspace-sidebar { padding-top:28px; }
+.brand-mark { border-radius:10px; }
+.brand strong { font-size:17px; letter-spacing:-.02em; }
+.brand small { font-size:11px; }
+.client-select { background:var(--card); border-color:var(--border); border-radius:var(--radius-control); box-shadow:var(--shadow-card); }
+.client-select small { font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; }
+.client-select select { font-size:13.5px; }
+.sidebar-nav-label { font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; }
+.nav-item { height:44px; font-size:13.5px; border-radius:var(--radius-control); }
+.nav-item svg { width:18px; height:18px; }
+.nav-item.active { box-shadow:0 1px 2px oklch(.205 0 0 / .12); }
+.workspace-note { font-size:12px; }
+.workspace-note small { font-size:11px; }
+.profile-button strong { font-size:12.5px; }
+.profile-button small { font-size:11px; }
+
+/* Horní lišta: zůstává na očích a jemně prosvítá */
+.topbar { position:sticky; top:0; z-index:20; font-size:12.5px; background:color-mix(in oklch,var(--background) 86%,transparent); backdrop-filter:saturate(1.4) blur(10px); -webkit-backdrop-filter:saturate(1.4) blur(10px); }
+.demo-label { font-size:11.5px; }
+
+/* Nadpisy stránek */
+.page-content { animation:page-in 240ms ease-out both; }
+@keyframes page-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+.eyebrow { font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+h1 { font-size:32px; line-height:1.2; }
+.page-heading p { font-size:13.5px; line-height:1.55; max-width:62ch; }
+.page-actions button,.period-select { height:40px; border-radius:var(--radius-control); font-size:13px; }
+.period-select select { font-size:13px; }
+.context-line { font-size:12px; }
+.context-line button { font-size:11.5px; }
+
+/* Karty: jednotný poloměr, jemný stín, bez těžkých efektů */
+.metric-card,.chart-panel,.channel-panel,.creative-card,.report-card,.reco-card,.goal-card,.goal-form,.connector-card,.gsc-slot,.import-entry,.ai-payload,.task-card {
+ border-radius:var(--radius-card); box-shadow:var(--shadow-card); border-color:var(--border);
+}
+.metric-card,.creative-card,.reco-card,.report-card { transition:box-shadow 200ms,transform 200ms,border-color 200ms; }
+.metric-card:hover,.creative-card:hover,.reco-card:hover,.report-card:hover { box-shadow:var(--shadow-card-hover); transform:translateY(-1px); }
+.metrics-grid { gap:18px; }
+.metric-card { padding:22px; }
+.metric-label { font-size:13px; font-weight:500; }
+.metric-value { font-size:34px; letter-spacing:-.03em; margin:14px 0 14px; }
+.metric-change { font-size:12.5px; }
+.metric-bottom small { font-size:11px; }
+.metric-accent { box-shadow:0 1px 2px oklch(.205 0 0 / .08), 0 8px 24px color-mix(in oklch,var(--primary) 35%,transparent); }
+.sparkline { width:76px; height:38px; }
+.insight-strip { font-size:13px; border-radius:var(--radius-control); padding:14px 16px; }
+.insight-strip strong { font-size:13px; }
+.insight-strip button { font-size:12px; height:30px; }
+.metrics-extra { border-radius:var(--radius-card); box-shadow:var(--shadow-card); }
+.metrics-extra dt { font-size:12px; }
+.metrics-extra dd { font-size:19px; letter-spacing:-.01em; }
+.metrics-extra small { font-size:11px; }
+
+/* Grafy */
+.section-heading h2 { font-size:16px; }
+.section-heading p { font-size:12px; }
+.section-heading button { font-size:12px; }
+.segmented { border-radius:var(--radius-control); background:var(--secondary); border-color:transparent; }
+.segmented button { height:28px; font-size:12px; border-radius:7px; }
+.segmented button.selected { background:var(--card); box-shadow:0 1px 2px oklch(.205 0 0 / .1)!important; font-weight:700; }
+.chart-summary>strong { font-size:28px; letter-spacing:-.02em; }
+.positive { font-size:12.5px; }
+.chart-legend { font-size:11.5px; }
+.chart-footnote { font-size:11px; }
+.channel-total small { font-size:11.5px; }
+.channel-total strong { font-size:28px; letter-spacing:-.02em; }
+.channel-stacked { height:20px; border-radius:6px; }
+.channel-row strong { font-size:13px; }
+.channel-row small { font-size:11.5px; }
+.channel-row>span:last-child { font-size:13px; }
+.channel-symbol { width:32px; height:32px; border-radius:8px; }
+
+/* Tabulky */
+.table-toolbar { border-radius:var(--radius-card) var(--radius-card) 0 0; }
+.table-pagination { border-radius:0 0 var(--radius-card) var(--radius-card); font-size:12px; }
+.search-input input { font-size:13px; }
+.toolbar-select,.table-toolbar button,.filter-row select { font-size:12.5px; border-radius:8px; }
+.table-scroll table { font-size:13px; }
+.table-scroll th { font-size:11.5px; font-weight:600; letter-spacing:.02em; background:var(--secondary); padding:12px 18px; z-index:1; }
+.table-scroll th button { font-size:11.5px; }
+.table-scroll td { padding:14px 18px; }
+.table-scroll tbody tr { transition:background 150ms; }
+.table-scroll tbody tr:hover { background:var(--row-hover); }
+.campaign-name strong { font-size:13px; }
+.campaign-name small { font-size:11.5px; }
+.table-status { font-size:11.5px; }
+.source-icon { border-radius:8px; }
+.empty-state { font-size:13px; }
+
+/* Kreativy, rady, reporty */
+.creative-image { border-radius:0; }
+.creative-format,.creative-rank { font-size:11px; }
+.creative-title strong { font-size:14px; }
+.creative-info>small,.creative-metrics small { font-size:11px; }
+.creative-metrics strong { font-size:14px; }
+.creative-extra { font-size:11.5px; }
+.reco-top,.reco-priority { font-size:11px; }
+.reco-card h3 { font-size:14.5px; }
+.reco-card p { font-size:13px; line-height:1.55; }
+.reco-foot small { font-size:11px; }
+.reco-foot strong { font-size:13.5px; }
+.reco-toggles,.reco-toggles button,.reco-audience,.reco-hide { font-size:12px; }
+.report-card h2 { font-size:18px; }
+.report-card>small { font-size:11px; }
+.report-card p { font-size:13px; }
+.report-card>div { font-size:12px; }
+.report-type { font-size:11px; }
+.page-tabs button { font-size:13.5px; }
+.info-banner { font-size:13px; }
+.integration-row p,.settings-detail p { font-size:12.5px; }
+.integration-state { font-size:12px; }
+.automation-row div strong { font-size:13px; }
+.automation-row small { font-size:11.5px; }
+.workspace-footer { font-size:11px; }
+
+/* Cíle, úkoly, Search Console, datové zdroje */
+.goal-form label,.goal-help,.goal-why,.goal-channels { font-size:12px; }
+.goal-form input,.goal-form select,.goal-form textarea,.task-owner input,.task-select,.gsc-threshold input,.gsc-search,.ai-provider select { font-size:13px; border-radius:8px; }
+.goal-card h3,.task-card h3 { font-size:13.5px; }
+.goal-values { font-size:12.5px; }
+.goal-values strong { font-size:22px; letter-spacing:-.02em; }
+.goal-bar { height:10px; }
+.goal-verdict { font-size:12px; }
+.task-column h3 { font-size:12.5px; }
+.task-owner,.task-status button { font-size:11.5px; }
+.gsc-slot strong,.connector-head strong { font-size:14px; }
+.gsc-slot p,.gsc-slot small,.gsc-note,.connector-head p,.connector-note,.connector-csv,.connector-csv>p,.gsc-threshold,.gsc-up,.gsc-down,.import-entry,.column-report,.ai-provider { font-size:12px; }
+.import-entry strong { font-size:12.5px; }
+.ai-toggle { font-size:13px; }
+
+/* Mobil: drobný text nesmí klesnout pod 11 px */
+@media(max-width:767px) {
+ h1,.page-heading h1 { font-size:26px; }
+ .metrics-grid { gap:10px; }
+ .metric-card { padding:16px 14px; }
+ .metric-label { font-size:11.5px; }
+ .metric-value { font-size:22px; }
+ .metric-change { font-size:11px; }
+ .metric-bottom small { font-size:10.5px; }
+ .sparkline { width:40px; height:28px; }
+ .page-actions button,.period-select select { font-size:12px; }
+ .context-line>div,.context-line button { font-size:11px; }
+ .table-pagination,.table-pagination>div>span { font-size:11px; }
+ .toolbar-select,.table-toolbar button { font-size:12px; }
+ .creative-info>small,.creative-metrics small { font-size:11px; }
+ .workspace-footer { font-size:10.5px; }
+ .integration-row p,.integration-state { font-size:11.5px; }
+ .page-content { animation:none; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .page-content { animation:none; }
+ .metric-card:hover,.creative-card:hover,.reco-card:hover,.report-card:hover { transform:none; }
+}
